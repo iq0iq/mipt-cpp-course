@@ -4,7 +4,6 @@
 #include <string_view>
 
 inline void SetValue(SomeLibrary::ValueHolder &valueHolder, int value) {
-  // MyLibrary::ValueHolder copyValueHolder;
   std::string s[2];
   char *struct_ptr = reinterpret_cast<char *>(&valueHolder);
   std::size_t shift =
