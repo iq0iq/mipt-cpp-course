@@ -1,31 +1,27 @@
 #include <exception>
+#include <vector>
 template <class T>
 void TransformIf(T *begin, T *end, bool (*p)(const T &), void (*f)(T &)) {
   std::size_t size = end - begin;
-  T *copy = new T[size];
+  std::vector<T> copy(size);
   for (std::size_t i = 0; begin + i != end; ++i) {
+    try {
+      copy[i] = begin[i];
+    } catch (...) {
+    }
     try {
       if (p(begin[i])) {
         try {
-          copy[i] = begin[i];
-        } catch (...) {
-        }
-        try {
           f(begin[i]);
         } catch (...) {
+          begin[i] = copy[i];
           throw;
         }
       }
     } catch (...) {
-      try {
-        for (std::size_t j = 0; j <= i; ++j) {
-          begin[j] = copy[j];
-        }
-      } catch (...) {
-        delete[] copy;
-        throw;
+      for (std::size_t j = 0; j < i; ++j) {
+        begin[j] = copy[j];
       }
-      delete[] copy;
       throw;
     }
   }
