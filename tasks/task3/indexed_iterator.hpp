@@ -1,4 +1,10 @@
-template <class Iterator> class IndexedIterator : public Iterator {
+template <class Iterator> class IndexedIterator {
+public:
+  using difference_type = typename Iterator::difference_type;
+  using value_type = typename Iterator::value_type;
+  using pointer = typename Iterator::pointer;
+  using reference = typename Iterator::reference;
+  using iterator_category = typename Iterator::iterator_category;
 
 private:
   Iterator it_;
@@ -22,11 +28,23 @@ public:
     return copy;
   }
 
+  IndexedIterator &operator--() {
+    --it_;
+    --index_;
+    return *this;
+  }
+
+  IndexedIterator operator--(int) {
+    auto copy = *this;
+    --*this;
+    return copy;
+  }
+
   IndexedIterator operator+(long long x) {
     return IndexedIterator(it_ + x, index_ + x);
   }
 
-  long long operator-(const IndexedIterator &it) { return it_ - it.it_; }
+  difference_type operator-(const IndexedIterator &it) { return it_ - it.it_; }
 
   IndexedIterator operator-(long long x) {
     return IndexedIterator(it_ - x, index_ - x);
@@ -38,7 +56,7 @@ public:
 
   bool operator!=(const Iterator &it) { return it_ != it; }
 
-  bool operator==(const IndexedIterator &it) { return it_ == it.it_; }
+  bool operator==(const IndexedIterator &it) const { return it_ == it.it_; }
 
   size_t index() const { return index_; }
 };
