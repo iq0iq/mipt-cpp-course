@@ -19,15 +19,13 @@ public:
   }
 
   void deallocate(void *chunk, size_t size) {
-    ::operator delete(chunk);
     if (alloc_ == nullptr) {
       alloc_ = reinterpret_cast<Chunk *>(chunk);
       return;
     }
-    Chunk *next_ = alloc_->next;
-    alloc_->next = reinterpret_cast<Chunk *>(chunk);
-    if (next_ != nullptr)
-      alloc_->next->next = next_;
+    Chunk *new_head = reinterpret_cast<Chunk *>(chunk);
+    new_head->next = alloc_;
+    alloc_ = new_head;
   }
 
 private:
@@ -38,10 +36,10 @@ private:
   Chunk *allocateBlock(size_t chunkSize) {
     char *start =
         reinterpret_cast<char *>(::operator new(chunkSize *chunksPerBlock_));
-    Chunk *current = new (start) Chunk();
+    Chunk *current = reinterpret_cast<Chunk *>(start);
     for (size_t i = 1; i < chunksPerBlock_; ++i) {
       current->next = reinterpret_cast<Chunk *>(start + i * chunkSize);
-      current = new (current->next) Chunk();
+      current = current->next;
     }
     current->next = nullptr;
     return reinterpret_cast<Chunk *>(start);
